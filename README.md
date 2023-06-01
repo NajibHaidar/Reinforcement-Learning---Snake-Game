@@ -223,6 +223,139 @@ Then, three loops iterate over each range, one at a time, keeping the other two 
 
 This methodical exploration of hyperparameters allows for the investigation of how each one affects the model's performance. This is an essential part of reinforcement learning, as it helps to fine-tune the model and understand the influence of each parameter on the gameplay.
 
+
+Next, the `utils.py` script contains the main functionality for running the Monte Carlo algorithm and rendering the game, broken down into three main functions: `perform_mc`, `epsilon_greedy_policy`, and `show_games`.
+
+1. `perform_mc` function: 
+
+
+```python
+def perform_mc(env, num_episodes, epsilon, gamma, rewards):
+    """
+    Perform monte carlo algorithm on num_episodes with epsilon moves on the
+    Snake environment.
+
+    Rewards should be given in the form of a list in the order :
+    [Losing move, Inefficient move, Efficient move, Winning move]
+    """
+    action_space_size = 4
+    q_table = defaultdict(lambda: np.zeros(action_space_size))
+    state_action_count = defaultdict(lambda: np.zeros(action_space_size))
+    for _ in tqdm(range(num_episodes)):
+        episode_rewards = []
+        episode_states = []
+        episode_actions = []
+        state, _ = env.reset()
+        n_step = 0
+        while True:
+            actions = env.get_valid_actions(state)
+            action = epsilon_greedy_policy(tuple(tuple(x) for x in state),
+                                           actions,
+                                           q_table,
+                                           epsilon)
+            next_state, reward, done, _ = env.step(action)
+            # Reward is:
+            # -1 if the move made the player lose
+            # 0 if no apple is taken
+            # 1 if apple is taken
+            # 10 if the player won (screen full of snake)
+
+            if reward == -1:
+                reward = rewards[0]
+            elif reward == 0:
+                reward = rewards[1]
+            elif reward == 1:
+                reward = rewards[2]
+            else:
+                reward = rewards[3]
+            episode_rewards.append(reward)
+            episode_states.append(tuple(tuple(x) for x in state))
+            episode_actions.append(action)
+            if done or n_step > 100:
+                break
+            state = next_state
+        unique_state_action_pairs = list(set(zip(episode_states, episode_actions)))
+
+        for state, action in unique_state_action_pairs:
+            indices = [i for i, (s, a) in enumerate(zip(episode_states, episode_actions)) if s == state and a == action]
+            for i in indices:
+                G = sum([episode_rewards[j]*gamma**(j-i) for j in range(i, len(episode_rewards))])
+                state_action_count[state][action] += 1
+                q_table[state][action] += (G - q_table[state][action]) / state_action_count[state][action]
+
+    return q_table
+```
+This function is the heart of the Monte Carlo algorithm implementation. The function takes five parameters: the environment `env`, the number of episodes `num_episodes`, the exploration rate `epsilon`, the discount factor `gamma`, and the reward structure `rewards`.
+
+In this function, the Q-table is initialized as a defaultdict, which is a dictionary-like object that provides all methods provided by a dictionary but takes a first argument (default factory) as a default data type for the dictionary. Here, the default data type is a numpy array of zeros of size equivalent to the action space size. The `state_action_count` is another defaultdict that tracks the number of times each action is taken for each state.
+
+The function then starts iterating over the specified number of episodes. For each episode, it plays the game until it reaches a terminal state or a maximum number of steps is reached. The game state, action taken, and reward received are recorded for each step in the episode. These records are used to calculate the return (G), which is the sum of discounted rewards from each step. This return is used to update the Q-value for the state-action pair.
+
+The Monte Carlo method is a First-Visit MC method, where the value of a state-action pair is updated based on the first visit to that pair in an episode. To implement this, a list of unique state-action pairs is created using the `set` function. Then, for each unique state-action pair, the indices of its occurrences in the episode are found. The return (G) is calculated for each occurrence, and the Q-value of the state-action pair is updated accordingly.
+
+2. `epsilon_greedy_policy` function:
+
+```python
+def epsilon_greedy_policy(state, actions, q_table, epsilon):
+    if np.random.uniform(0, 1) < epsilon:
+        return np.random.choice(actions)
+    else:
+        q_values = {action: q_table[state][action] for action in actions}
+        return max(q_values, key=q_values.get)
+```
+This function implements the ε-greedy policy, which is a way of selecting actions such that the agent explores the environment and exploits its current knowledge. The function takes four parameters: the current state `state`, the available actions `actions`, the Q-table `q_table`, and the exploration rate `epsilon`.
+
+The function selects an action based on the ε-greedy policy: with a probability of ε, it selects a random action (exploration), and with a probability of 1-ε, it selects the action with the highest Q-value for the current state (exploitation).
+
+3. `show_games` function:
+
+```python
+def show_games(env, n_games, q_table, time_between_plays=0.0000000000001, max_time_per_game=30):  # Add max_time_per_game parameter
+    # assert env.with_rendering, "You need to activate rendering on the \
+    # environment to see the game"
+
+    episode_rewards = []  # Store the reward for each game
+
+    total_reward = 0
+    for i in range(n_games):
+        game_completed = False
+        while not game_completed:
+            start_time = time.time()  # Start the timer
+            state, _ = env.reset()
+
+            episode_reward = 0
+            done = False
+            while not done:
+                # If the time limit has been exceeded, restart the game
+                if time.time() - start_time > max_time_per_game:
+                    break
+
+                time.sleep(time_between_plays)
+                actions = env.get_valid_actions(state)
+                action = epsilon_greedy_policy(tuple(tuple(x) for x in state),
+                                               actions,
+                                               q_table,
+                                               0.00)
+                new_state, reward, done, _ = env.step(action)
+                episode_reward += reward
+                state = new_state
+                
+                # If the game is finished and the time limit was not exceeded, the game is completed
+                if done:
+                    game_completed = True
+                    print(f"Reward on game {i} was {episode_reward}")
+
+                    episode_rewards.append(episode_reward)  # Append the reward for this game
+                    total_reward += episode_reward
+                    
+    return total_reward, episode_rewards  # Return the list of rewards
+```
+
+This function is used to render the game and watch the agent play after the Q-table has been learned. The function takes five parameters: the environment `env`, the number of games `n_games`, the Q-table `q_table`, the time delay between plays `time_between_plays`, and the maximum time for a game `max_time_per_game`.
+
+In this function, the agent plays the specified number of games following the ε-greedy policy with ε set to 0 (i.e., always exploiting its current knowledge, no exploration). The total reward and the reward for each game are recorded. If a game exceeds the maximum time limit, it is restarted. The function returns the total reward and the list of rewards for each game.
+
+
 ### Sec. IV. Computational Results
 
 In the first part, it can be seen from the plot below that the resulting fit was not very accurate but still pretty close to emulating the flucuations of the given data points. The **minimum error** was determined to be around **1.593** while the 4 optimal parameters found were **A=2.17**, **B=0.91**, **C=0.73**, **D=31.45**.
