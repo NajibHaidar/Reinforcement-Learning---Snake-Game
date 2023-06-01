@@ -1,7 +1,5 @@
 # Reinforcement-Learning---Snake-Game
 
-# MachineLearningNonLinearOptimization
-
 ### Table of Contents
 [Abstract](#Abstract)
 <a name="Abstract"/>
@@ -99,6 +97,8 @@ Finally, an essential aspect of RL is the trade-off between exploration and expl
 This theoretical framework forms the backbone of our project, enabling us to investigate the impact of varying reward structures and exploration rates on the gameplay of our agent, the snake.
 
 ### Sec. III. Algorithm Implementation and Development
+
+We will only go over **training.py** and **utils.py** since they are the two files involved in training the model and determining how the hyperparameters affect it.
 
 We begin with the **training.py** file which is the main script that drives the training and analysis of the model. It begins by importing the necessary modules and setting some initial hyperparameters. Here is a breakdown of the various sections:
 
@@ -226,7 +226,7 @@ This methodical exploration of hyperparameters allows for the investigation of h
 
 Next, the `utils.py` script contains the main functionality for running the Monte Carlo algorithm and rendering the game, broken down into three main functions: `perform_mc`, `epsilon_greedy_policy`, and `show_games`.
 
-**1. The `perform_mc` Function: **
+**1. The `perform_mc` Function:**
 
 ```python
 def perform_mc(env, num_episodes, epsilon, gamma, rewards):
@@ -357,82 +357,8 @@ In this function, the agent plays the specified number of games following the ε
 
 ### Sec. IV. Computational Results
 
-In the first part, it can be seen from the plot below that the resulting fit was not very accurate but still pretty close to emulating the flucuations of the given data points. The **minimum error** was determined to be around **1.593** while the 4 optimal parameters found were **A=2.17**, **B=0.91**, **C=0.73**, **D=31.45**.
+![image](https://github.com/NajibHaidar/Reinforcement-Learning---Snake-Game/assets/116219100/41af6870-88f4-4ab4-bd6e-664de7e3657a)
 
-![image](https://user-images.githubusercontent.com/116219100/231102068-249d81e0-9f32-4f40-bfec-1a8ee8a93291.png)
-*Figure 2: Fitting f(x) on X and Y using least-squares fit*
-
-
-In the next part, the 2D loss (error) landscape's color maps yieled interesting results and provided insight to the affect certain parameters have on the function's number of minima.
-
-![image](https://user-images.githubusercontent.com/116219100/231120449-630141c5-62f8-4375-89e4-be8d496d7aa1.png)
-*Figure 3: Error Landscape, fix AB and sweep CD*
-
-In figure 3 we can see that the effect of C when A and B are fixed is very minimal. For the entire range of C, the color is almost the same whereas as D ranges from 15 to 45 the error increases dramatically from well below 100 to over 500. This shows that the value of D has a very big impact when A and B are fixed.
-
-![image](https://user-images.githubusercontent.com/116219100/231120490-b3197e4d-729a-43c4-a936-de2912acbc60.png)
-*Figure 4: Error Landscape, fix AC and sweep BD*
-
-Figure 4 is very interesting because we can see that when A and C are fixed, the error tends to minimize the closer B gets to around 17. Note that this is true for D being between 15 and 45. At first glance it looks like D does not have any influence, however, some ripples can be noticed at values of around 22, 27, 34, and 41 for D. We can see that at these values of D, the error is very minimal when B is between 10 and 15. 
-
-![image](https://user-images.githubusercontent.com/116219100/231120534-47e8030b-c240-4e9d-92d9-63001816dc9a.png)
-*Figure 5: Error Landscape, fix AD and sweep BC*
-
-In figure 5 we can see that the effect of C when A and D are fixed is very minimal. For the entire range of C, the color is almost the same whereas as B ranges from 0 to 30 the error increases dramatically from well below 100 to over 500. This shows that the value of B has a very big impact when A and D are fixed.
-
-![image](https://user-images.githubusercontent.com/116219100/231120588-bb073468-cb03-4b7b-badb-3af858a114d4.png)
-*Figure 6: Error Landscape, fix BC and sweep AD*
-
-Figure 6 is a good example of what a convex error surface would look like. Notice how no matter what point we start with here, if we follow the color descent gradient we will always end up in the minimum error region that is well below 5. We can also see that this lowest error occurs at almost A=17 and D=18 when B and C are fixed to their optimal values.
-
-![image](https://user-images.githubusercontent.com/116219100/231120638-f7cfaf66-13c8-465e-8b23-35193e4023a6.png)
-*Figure 7: Error Landscape, fix BD and sweep AC*
-
-In figure 7 we can see that the effect of C when B and D are fixed is very minimal. For the entire range of C, the color is almost the same whereas as A ranges from 0 to 30 the error increases dramatically from well below 100 to over 500. This shows that the value of A has a very big impact when B and D are fixed.
-
-![image](https://user-images.githubusercontent.com/116219100/231120679-7027a978-9c71-4eb3-8563-553a2a0a95e0.png)
-*Figure 8: Error Landscape, fix BD and sweep AC*
-
-Figure 8 is very interesting because we can see that when C and D are fixed, the error tends to minimize the closer B gets to around 0. Note that this is true for A being between 0 and 30. At first glance it looks like A does not have any influence, however, some ripples can be noticed at values of A. We can see that at these values of A, the error is very minimal, especially the closer B is to 0. It should also be noted that there are about 3 yellow lines showing that if A is at these values and B is closer to 30, the error increases by a good amount.
-
-
-Moving on to testing different polynomial models against different sections of the data, we can see how training on different portions of the data leads to varying errors:
-
-```
-LINE MODEL, -Test End-:
-Training Error: 2.242749386808539
-Test Error: 3.4392356574390317
-
-LINE MODEL, -Test Middle-:
-Training Error: 1.8516699043293752
-Test Error: 2.943490105614687
-
-
-PARABOLA MODEL, -Test End-:
-Training Error: 2.125539348277377
-Test Error: 9.035130793088825
-
-PARABOLA MODEL, -Test Middle-:
-Training Error: 1.85083641159579
-Test Error: 2.910426615782527
-
-
-19th DEGREE POLYNOMIAL MODEL, -Test End-:
-Training Error: 0.02835144302630829
-Test Error: 30023572038.458946
-
-19th DEGREE POLYNOMIAL MODEL, -Test Middle-:
-Training Error: 0.16381508563760222
-Test Error: 507.53804019224077
-```
-
-Recall that the given data points oscillate but still steadily increase as X increases.
-
-For the line model, both types of tests yielded very low error in training and testing. However it seems that this model adapted better (although slim) to the version where we removed the middle values during training. This could be interpreted that since we are drawing a line here, the incline is what is important. The total incline can be better depicted by taking points in the beginning and then end of the entire data set and thus this would reduce error.
-
-For the parabola model, the test error after training on the last 10 points was noticeably higher than that on the middle points. This could be interpreted that since the degree of curvature of a parabola will depend on future points, this was better captured when taking points in the beginning and then end of the entire data set and thus this would reduce error.
-
-For the 19th degree polynomial model, the training error in both cases was almost nonexistent. This makes sense since a 19th degree polynomial can pass through all 10 data points with ease due to its degree. However, the test error was astronomical when testing the last 10 points and very large when testing the middle 10 points. This greatly descibes a phenomenon called overfitting. The model has been trained so strongly on the training data (by passing through each point) that when it is given data outside this data set its behaviour is very offset. The test on the middle points was definitely much better (although still not good) than the test on the end points. The interpretation for this is that since the problem here is overfitting, the gap presented by skipping the middle 10 points in training allows this model to be less overfit than its counterpart. The one tested on the first 20 points catches onto the given data points much more strongly and thus results in a much stronger effect of overfitting thus greatly increasing the error when the data changes from what the model was trained on.
 
 ### Sec. V. Summary and Conclusions
 
