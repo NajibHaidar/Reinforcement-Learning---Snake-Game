@@ -100,85 +100,128 @@ This theoretical framework forms the backbone of our project, enabling us to inv
 
 ### Sec. III. Algorithm Implementation and Development
 
-The implemenation began by studying the data given and it quickly became clear that a model function including cosine would make sense:
+We begin with the **training.py** file which is the main script that drives the training and analysis of the model. It begins by importing the necessary modules and setting some initial hyperparameters. Here is a breakdown of the various sections:
 
-![image](https://user-images.githubusercontent.com/116219100/231102445-480b4510-7659-4146-a764-f623350de300.png)
-*Figure 1: Plot of data points X and Y*
+The code snippet provided is the main script that drives the training and analysis of the model. It begins by importing the necessary modules and setting some initial hyperparameters. Here is a breakdown of the various sections:
 
-Once the model function was down and the number of parameters was determined, a conventional approach was taken to find the 'optimal' parameters that would yield minimum error through least-sqaures error. First, a helper function, **LSE** (least-squares error), which would calculate the least-squares error given 4 parameters as an array_like object, **c**, the given input data set, **x**, and the given output data set, **y**.
+**1. Import Statements and Initial Variables**
 
+```python
+from ctypes import alignment
+import pickle
+import pprint
+import os
+
+from game.Snake import Snake
+from reinf.SnakeEnv import SnakeEnv
+from reinf.utils import perform_mc, show_games
+
+import pickle
+from collections import defaultdict
+import matplotlib.pyplot as plt
+
+grid_length = 4
+n_episodes = 600000
+gamma = 0.92 
+num_games = 50
+winning_score = 24
 ```
-def LSEfit(c, x, y):
-    E = np.sqrt(np.sum((c[0]*np.cos(c[1]*x)+c[2]*x+c[3]-y)**2)/n)
-    return E
+The script begins by importing necessary Python libraries and specific functions from the game and reinforcement learning (reinf) modules. The `grid_length`, `n_episodes`, `gamma`, `num_games`, and `winning_score` variables are then defined. These will be used as the core hyperparameters for the training of the snake game model.
+
+**2. The `train_model` Function**
+
+```python
+def train_model(epsilon, rewards):
+    # Training part
+    env = SnakeEnv(grid_length=grid_length, with_rendering=False)
+    q_table = perform_mc(env, n_episodes, epsilon, gamma, rewards)
+
+    # Viz part
+    env = SnakeEnv(grid_length=grid_length, with_rendering=False)
+    total_reward, episode_rewards = show_games(env, num_games, q_table) 
+
+    return q_table, total_reward, episode_rewards
 ```
+This function performs the training and visualization of the game model. A `SnakeEnv` environment is created, and then the Monte Carlo simulation is performed using the `perform_mc` function. After training, the `show_games` function is called to visualize the game and return the total and episodic rewards.
 
-Then, optimization was applied using the SciPy library's optimize module which was imported as opt:
+**3. The `get_unique_filename` Function**
 
+```python
+def get_unique_filename(filename):
+    base_name, extension = os.path.splitext(filename)
+    counter = 1
+    while os.path.exists(filename):
+        filename = f"{base_name} ({counter}){extension}"
+        counter += 1
+    return filename
 ```
-# set the initial guess for the parameters
-c0 = np.array([3, 1*np.pi/4, 2/3, 32])
+This function ensures that the filename used for saving the model is unique. It does this by appending a counter to the base filename if a file with the same name already exists.
 
-# perform optimization
-res = opt.minimize(LSEfit, c0, args=(X, Y), method='Nelder-Mead')
+**4. The `save_model` Function**
 
-# get the optimized parameters
-c = res.x
+```python
+def save_model(epsilon, rewards, q_table, total_reward, episode_rewards, dir_name):
+    # Convert defaultdict to regular dict before pickling
+    model_dict = {
+        'hyperparameters': {
+            'num_episodes': n_episodes,
+            'epsilon': epsilon,
+            'gamma': gamma,
+            'rewards_set': rewards
+        },
+        'rewards_returned': {
+            'episode_rewards': episode_rewards,
+            'total_reward': total_reward
+        },
+        'q_table': dict(q_table),
+    }
+    model_score = model_dict['rewards_returned']['total_reward'] / (num_games * winning_score)
+    model_score = model_score * 100
+    ...
+    with open(full_path_pickle, 'wb') as f:
+        pickle.dump(model_dict, f)
+    ...
+    with open(full_path_pretty, 'w') as f:
+        pprint.pprint(model_dict, stream=f)
 ```
-As previously mentioned, the initial guess will vary the results since this is a nonlinear model with an unknown number of solutions. The initial guess used was the best I could find after trial and error. Optimization was done using the **LSEFit** function mentioned above and the Nelder-Mead method. I used this method because it is useful for optimizing functions that are not differentiable or whose derivatives are difficult to compute, however, do note that this method is a popular choice for optimization problems with a small number of variables, but can become inefficient in high-dimensional spaces or if the function being optimized is highly nonlinear or has multiple local minima.
+This function saves the trained model, including its hyperparameters and rewards, into a pickle file. It also saves a pretty-printed version of the model dictionary into a text file. The model's score is calculated as a percentage of the total reward over the product of `num_games` and `winning_score`.
 
-After the optimized parameters were found, the minimum error (the furthest down the optimization algorithm could go) was found by passing these optimized parameters through the **LSEFit** function. The results will be discussed in **section IV.**.
+**5. Hyperparameter Exploration**
 
+```python
+# Define range of parameters
+epsilon_range = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] 
+death_reward_range = [-3000, -1050, -100, -10, -1, 0, 10, 100, 2000, 10000, 100000000000] 
+apple_reward_range = [100, 200, 500, 750, 1000, 2000, 3000, 5000, 10000, 20000, 100000000000]  
 
-In the next part of the project, the previously found parameters were studied more deeeply. Two of the four parameters were fixed at their optimal value while the other two were swept from 0 to 30 and a 2D loss (error) landscape was generated. Consider the case where A and B were the fixed parameters and C and D were swept across:
+# Initialize lists to store results
+epsilon_results = []
+death_reward_results = []
+apple_reward_results = []
 
+# Vary epsilon, keeping rewards fixed
+for epsilon in epsilon_range:
+    q_table, total_reward, episode_rewards = train_model(epsilon, rewards=[-1050, -75, 2000, 10000000000000000])
+    epsilon_results.append(total_reward / num_games)
+    save_model(epsilon, [-1050, -75, 2000, 10000000000000000], q_table, total_reward, episode_rewards, 'epsilon')
+
+# Vary death reward, keeping epsilon and apple reward fixed
+for death_reward in death_reward_range:
+    q_table, total_reward, episode_rewards = train_model(0.05, rewards=[death_reward, -75, 2000, 10000000000000000])
+    death_reward_results.append(total_reward / num_games)
+    save_model(0.05, [death_reward, -75, 2000, 10000000000000000], q_table, total_reward, episode_rewards, 'death')
+
+# Vary apple reward, keeping epsilon and death reward fixed
+for apple_reward in apple_reward_range:
+    q_table, total_reward, episode_rewards = train_model(0.05, rewards=[-1050, -75, apple_reward, 10000000000000000])
+    apple_reward_results.append(total_reward / num_games)
+    save_model(0.05, [-1050, -75, apple_reward, 10000000000000000], q_table, total_reward, episode_rewards, 'apple')
 ```
-# FIX A B
-# Initialize error grid
-error_gridAB = np.zeros((len(C_range), len(D_range)))
+In this section, the exploration of different hyperparameters is carried out. Three ranges are defined: one for the epsilon value (which controls the exploration vs exploitation trade-off), one for the reward received upon the snake's death, and one for the reward received for eating an apple. 
 
-# Loop through C and D ranges and compute error for each combination
-for i, C in enumerate(C_range):
-    for j, D in enumerate(D_range):
-        # Compute error for fixed A and B and swept C and D
-        error = compute_error(A_fixed, B_fixed, C, D, X, Y)
-        # Store error in error grid
-        error_gridAB[i, j] = error
+Then, three loops iterate over each range, one at a time, keeping the other two parameters constant. In each iteration, the `train_model` function is called to train the model, and the results (total reward and episode rewards) are saved. The `save_model` function is then used to save the model and its results for later analysis.
 
-# Generate x and y meshes from the ranges of C and D
-C_mesh, D_mesh = np.meshgrid(C_range, D_range)
-
-# Create a new figure and axis
-fig, ax = plt.subplots()
-
-# Plot the error grid as a pcolor map
-pcm = ax.pcolormesh(C_mesh, D_mesh, error_gridAB, cmap='viridis', shading='auto')
-
-# Add a colorbar to the plot
-plt.colorbar(pcm).set_label('Error', fontweight='bold')
-```
-
-Note that color meshes are particularly useful in visualizing 2D arrays or grids (as can be seen in **section IV.**, hence why they were used. The error was stored in a error grid to be plotted against the meshes generated from the swept ranges. 
-
-The above process was repeated for all six combinations of two fixed and two swept parameters.
-
-
-Next, the first 20 data points were used as training data to determine the coeficients to fit a line, parabola and 19th degree polynomial to the data. Then, using these coeficients, the prediction accuracy of the model was tested against the last 10 data points using the least-squares error equation:
-
-```
-# Fit a parabola to the data
-parabola_coeffs = np.polyfit(X[:20], Y[:20], deg=2)
-parabola_predictions_train = np.polyval(parabola_coeffs, X[:20])
-parabola_error_train = np.sqrt(np.sum((Y[:20] - parabola_predictions_train) ** 2)/20)
-
-# Compute errors on test data
-parabola_predictions_test = np.polyval(parabola_coeffs, X[-10:])
-parabola_error_test = np.sqrt(np.sum((Y[-10:] - parabola_predictions_test) ** 2)/10)
-```
-
-Since all three of these fits are polynomials, the optimal coefficients were found using Numpy library's **polyfit** method. An initial guess was not required for this method since polynomials have a known number of solutions and therefore it iteratively minimizes the sum of squares of the residuals between the data and the polynomial fit until it determines the best-fit coefficients.
-
-Finally, the same procedure was done except the training data became the first 10 and last 10 data points and then this model was fit to the 10 held out middle points (test data). 
+This methodical exploration of hyperparameters allows for the investigation of how each one affects the model's performance. This is an essential part of reinforcement learning, as it helps to fine-tune the model and understand the influence of each parameter on the gameplay.
 
 ### Sec. IV. Computational Results
 
