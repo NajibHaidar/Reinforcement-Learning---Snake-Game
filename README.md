@@ -357,9 +357,35 @@ In this function, the agent plays the specified number of games following the ε
 
 ### Sec. IV. Computational Results
 
+In our experiments, we systematically manipulated the parameters epsilon, death_reward_value, and apple_reward_value, and observed how these changes affected the total rewards achieved by our snake agent in the game environment. Our results provided us with valuable insights into how these parameters influence the agent's learning process and performance.
+
+**Epsilon and Total Reward:**
+
 ![image](https://github.com/NajibHaidar/Reinforcement-Learning---Snake-Game/assets/116219100/41af6870-88f4-4ab4-bd6e-664de7e3657a)
 
+Epsilon is the exploration rate in our epsilon-greedy policy, dictating the probability of the agent taking a random action instead of exploiting the best known action in a given state. Our results showed that as epsilon increased, the total reward decreased.
+
+This can be explained by understanding the balance between exploration and exploitation in reinforcement learning. Higher values of epsilon lead to more exploration and less exploitation, meaning the agent is more likely to take random actions. While this can be beneficial in the early stages of learning when the agent needs to explore the environment, excessive exploration can lead to sub-optimal performance once the agent has learned a reasonably good policy. Lower epsilon values, on the other hand, allow the agent to capitalize on what it has learned, leading to higher total rewards.
+
+**Death Reward Value and Total Reward:**
+The death_reward_value parameter defines the reward received by the agent when it dies, i.e., when it runs into the wall or itself. Our results indicated that as death_reward_value became more positive, the total reward decreased.
+
+This outcome can be understood in the context of the signal that the death_reward_value provides to the agent during learning. In the snake game, death is a terminal state that the agent should strive to avoid. Thus, a more negative death_reward_value (i.e., a larger penalty) effectively discourages the agent from making moves that lead to death. If the penalty for death is less severe (i.e., death_reward_value is more positive), the agent is less deterred from making dangerous moves, leading to more frequent deaths and, consequently, lower total rewards.
+
+**Apple Reward Value and Total Reward:**
+
+The apple_reward_value parameter determines the reward given to the agent when it eats an apple. We found that the effect of apple_reward_value on total reward was complex and non-linear. Specifically, if apple_reward_value increased too much or became too small, the total reward decreased.
+
+This pattern suggests that there is an optimal range of apple_reward_values that promotes effective learning. If the apple_reward_value is too low, the agent does not receive sufficient positive reinforcement for eating apples, which is the primary goal of the game. This can prevent the agent from learning the importance of this action, reducing its overall performance. Conversely, if the apple_reward_value is excessively high, the agent may become overly focused on acquiring apples at the risk of ignoring other crucial aspects of the game, such as avoiding death. This overly greedy behavior can also lead to sub-optimal performance and lower total rewards. Thus, a balanced apple_reward_value is essential for maximizing total reward.
+
+These results underscore the importance of carefully tuning the parameters in reinforcement learning algorithms to optimize agent performance. Future work can explore other parameters and their interactions to further improve our understanding of the dynamics of the snake game environment.
 
 ### Sec. V. Summary and Conclusions
 
-In this project, we explored the use of least-squares error and 2D loss landscapes for fitting a mathematical model to a dataset. We found that the Nelder-Mead method was effective in finding the optimal parameters for the model, and that the 2D loss landscape provided useful insights into the behavior of the model function and the sensitivity of the model to changes in the parameter values. We also found that the 19th degree polynomial was the best model for fitting this particular dataset, but that was only due to overfitting and caution should be exercised when extrapolating beyond the range of the data. Aditionally, we concluded how training data has a large effect on the flexibility and accuracy of a model. Overall, this project demonstrates the usefulness of data modeling and the power of mathematical models for analyzing and understanding complex datasets in machine learning.
+In this study, we explored the performance of a reinforcement learning agent playing the snake game, focusing on the effects of different parameter settings. Our results provided valuable insights into how the epsilon, death_reward_value, and apple_reward_value parameters impact the agent's total rewards.
+
+We found that a careful balance between exploration and exploitation is critical for optimal performance. This balance is primarily regulated by the epsilon parameter, with higher epsilon values leading to more exploration and lower total rewards. Thus, our results underline the importance of fine-tuning epsilon to strike the right balance between exploration and exploitation.
+
+Our findings also highlighted the role of rewards in shaping the agent's behavior. We found that a more negative death_reward_value (i.e., a larger penalty for death) effectively discourages the agent from making dangerous moves, thereby increasing total rewards. Furthermore, we observed a complex, non-linear relationship between apple_reward_value and total reward, suggesting that there is an optimal range of apple_reward_values that encourages the agent to pursue its goal without neglecting other important aspects of the game.
+
+In conclusion, this study demonstrates that careful tuning of reinforcement learning parameters is crucial for optimizing agent performance in the snake game. Our findings provide a solid foundation for future work aiming to refine these parameters further or explore additional factors influencing performance. Moreover, the methodologies and insights from this study may have broader implications for optimizing reinforcement learning in other complex environments.
