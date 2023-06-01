@@ -226,8 +226,7 @@ This methodical exploration of hyperparameters allows for the investigation of h
 
 Next, the `utils.py` script contains the main functionality for running the Monte Carlo algorithm and rendering the game, broken down into three main functions: `perform_mc`, `epsilon_greedy_policy`, and `show_games`.
 
-1. `perform_mc` function: 
-
+**1. The `perform_mc` Function: **
 
 ```python
 def perform_mc(env, num_episodes, epsilon, gamma, rewards):
@@ -293,7 +292,7 @@ The function then starts iterating over the specified number of episodes. For ea
 
 The Monte Carlo method is a First-Visit MC method, where the value of a state-action pair is updated based on the first visit to that pair in an episode. To implement this, a list of unique state-action pairs is created using the `set` function. Then, for each unique state-action pair, the indices of its occurrences in the episode are found. The return (G) is calculated for each occurrence, and the Q-value of the state-action pair is updated accordingly.
 
-2. `epsilon_greedy_policy` function:
+**2. The `epsilon_greedy_policy` Function:**
 
 ```python
 def epsilon_greedy_policy(state, actions, q_table, epsilon):
@@ -307,7 +306,7 @@ This function implements the ε-greedy policy, which is a way of selecting actio
 
 The function selects an action based on the ε-greedy policy: with a probability of ε, it selects a random action (exploration), and with a probability of 1-ε, it selects the action with the highest Q-value for the current state (exploitation).
 
-3. `show_games` function:
+**3. The `show_games` Function:**
 
 ```python
 def show_games(env, n_games, q_table, time_between_plays=0.0000000000001, max_time_per_game=30):  # Add max_time_per_game parameter
