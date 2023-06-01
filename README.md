@@ -361,13 +361,18 @@ In our experiments, we systematically manipulated the parameters epsilon, death_
 
 **Epsilon and Total Reward:**
 
-![image](https://github.com/NajibHaidar/Reinforcement-Learning---Snake-Game/assets/116219100/41af6870-88f4-4ab4-bd6e-664de7e3657a)
+![image](https://github.com/NajibHaidar/Reinforcement-Learning---Snake-Game/assets/116219100/70d68871-0b60-4672-8ba3-b29cae0d90f0)
+*Figure 1: Epsilon vs Total Rewards*
 
 Epsilon is the exploration rate in our epsilon-greedy policy, dictating the probability of the agent taking a random action instead of exploiting the best known action in a given state. Our results showed that as epsilon increased, the total reward decreased.
 
 This can be explained by understanding the balance between exploration and exploitation in reinforcement learning. Higher values of epsilon lead to more exploration and less exploitation, meaning the agent is more likely to take random actions. While this can be beneficial in the early stages of learning when the agent needs to explore the environment, excessive exploration can lead to sub-optimal performance once the agent has learned a reasonably good policy. Lower epsilon values, on the other hand, allow the agent to capitalize on what it has learned, leading to higher total rewards.
 
 **Death Reward Value and Total Reward:**
+
+![image](https://github.com/NajibHaidar/Reinforcement-Learning---Snake-Game/assets/116219100/fc47a418-b1b7-4272-921c-47cb3897ed92)
+*Figure 2: Death Reward Value vs Total Rewards*
+
 The death_reward_value parameter defines the reward received by the agent when it dies, i.e., when it runs into the wall or itself. Our results indicated that as death_reward_value became more positive, the total reward decreased.
 
 This outcome can be understood in the context of the signal that the death_reward_value provides to the agent during learning. In the snake game, death is a terminal state that the agent should strive to avoid. Thus, a more negative death_reward_value (i.e., a larger penalty) effectively discourages the agent from making moves that lead to death. If the penalty for death is less severe (i.e., death_reward_value is more positive), the agent is less deterred from making dangerous moves, leading to more frequent deaths and, consequently, lower total rewards.
