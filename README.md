@@ -21,6 +21,10 @@
 
 
 ### Abstract
+
+This game was orignally created by my good friend Vincent: https://github.com/Vinwcent/SnakeReinf
+I made some modifications to the game and played around with the reward structure.
+
 This project explores the fascinating world of reinforcement learning through a classic game, Snake. We employ the Monte Carlo learning algorithm to train an AI agent (our snake) to play the game on a 4x4 grid. The main focus of the investigation is to understand the effects of the reward function and exploration rate (epsilon) on the agent's gameplay. Through an extensive series of experiments, models were trained with varying rewards for eating apples and dying, and exploration rates. The trained models were saved for analysis and future use, and their gameplay was observed to understand the impact of different parameters. This report presents the methodology, results, and insights derived from this investigation.
 
 ### Sec. I. Introduction and Overview
