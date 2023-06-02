@@ -385,6 +385,7 @@ This outcome can be understood in the context of the signal that the death_rewar
 
 ![image](https://github.com/NajibHaidar/Reinforcement-Learning---Snake-Game/assets/116219100/b22162f1-cb8d-41be-80c4-aed5ad071f3e)
 *Figure 3: Apple Reward Value vs Total Rewards*
+
 The apple_reward_value parameter determines the reward given to the agent when it eats an apple. We found that the effect of apple_reward_value on total reward was complex and non-linear. Specifically, if apple_reward_value increased too much or became too small, the total reward decreased.
 
 This pattern suggests that there is an optimal range of apple_reward_values that promotes effective learning. If the apple_reward_value is too low, the agent does not receive sufficient positive reinforcement for eating apples, which is the primary goal of the game. This can prevent the agent from learning the importance of this action, reducing its overall performance. Conversely, if the apple_reward_value is excessively high, the agent may become overly focused on acquiring apples at the risk of ignoring other crucial aspects of the game, such as avoiding death. This overly greedy behavior can also lead to sub-optimal performance and lower total rewards. Thus, a balanced apple_reward_value is essential for maximizing total reward.
